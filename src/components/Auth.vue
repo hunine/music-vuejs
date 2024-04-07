@@ -51,123 +51,8 @@
               >
             </li>
           </ul>
-
-          <!-- Login Form -->
-          <form v-show="tab === 'login'">
-            <!-- Email -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Email</label>
-              <input
-                type="email"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                placeholder="Enter Email"
-              />
-            </div>
-            <!-- Password -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Password</label>
-              <input
-                type="password"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                placeholder="Password"
-              />
-            </div>
-            <button
-              type="submit"
-              class="block w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
-            >
-              Submit
-            </button>
-          </form>
-          <!-- Registration Form -->
-          <vee-form v-show="tab === 'register'" :validation-schema="schema" @submit="register">
-            <!-- Name -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Name</label>
-              <vee-field
-                type="text"
-                name="name"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                placeholder="Enter Name"
-              />
-              <ErrorMessage class="text-red-600" name="name" />
-            </div>
-            <!-- Email -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Email</label>
-              <vee-field
-                type="email"
-                name="email"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                placeholder="Enter Email"
-              />
-              <ErrorMessage class="text-red-600" name="email" />
-            </div>
-            <!-- Age -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Age</label>
-              <vee-field
-                type="number"
-                name="age"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-              />
-              <ErrorMessage class="text-red-600" name="age" />
-            </div>
-            <!-- Password -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Password</label>
-              <vee-field
-                type="password"
-                name="password"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                placeholder="Password"
-              />
-              <ErrorMessage class="text-red-600" name="password" />
-            </div>
-            <!-- Confirm Password -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Confirm Password</label>
-              <vee-field
-                type="password"
-                name="confirmPassword"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-                placeholder="Confirm Password"
-              />
-              <ErrorMessage class="text-red-600" name="confirmPassword" />
-            </div>
-            <!-- Country -->
-            <div class="mb-3">
-              <label class="inline-block mb-2">Country</label>
-              <vee-field
-                as="select"
-                name="country"
-                class="block w-full py-1.5 px-3 text-gray-800 border border-gray-300 transition duration-500 focus:outline-none focus:border-black rounded"
-              >
-                <option value="USA">USA</option>
-                <option value="Mexico">Mexico</option>
-                <option value="Germany">Germany</option>
-                <option value="TEST">TEST</option>
-              </vee-field>
-              <ErrorMessage class="text-red-600" name="country" />
-            </div>
-            <!-- TOS -->
-            <div class="mb-3 pl-6">
-              <vee-field
-                type="checkbox"
-                name="tos"
-                value="1"
-                class="w-4 h-4 float-left -ml-6 mt-1 rounded"
-              />
-              <label class="block">Accept terms of service</label>
-              <ErrorMessage class="text-red-600" name="tos" />
-            </div>
-            <button
-              type="submit"
-              class="block w-full bg-purple-600 text-white py-1.5 px-3 rounded transition hover:bg-purple-700"
-            >
-              Submit
-            </button>
-          </vee-form>
+          <AppLoginForm v-if="tab === 'login'" />
+          <AppRegisterForm v-if="tab === 'register'" />
         </div>
       </div>
     </div>
@@ -177,28 +62,21 @@
 <script>
 import { mapState, mapWritableState } from 'pinia'
 import useModalStore from '@/stores/modal'
+import AppLoginForm from '@/components/LoginForm.vue'
+import AppRegisterForm from '@/components/RegisterForm.vue'
 
 export default {
   name: 'Auth',
+  components: {
+    AppLoginForm,
+    AppRegisterForm
+  },
   data() {
     return {
-      tab: 'login',
-      schema: {
-        name: 'required|min:3|max:100|alphaSpaces',
-        email: 'required|min:3|max:100|email',
-        age: 'required|minValue:18|maxValue:100',
-        password: 'required|min:3|max:100',
-        confirmPassword: 'required|confirmed:@password',
-        country: 'required|excluded:TEST',
-        tos: 'required'
-      }
+      tab: 'login'
     }
   },
-  methods: {
-    register(values) {
-      console.log(values)
-    }
-  },
+  methods: {},
   computed: {
     ...mapState(useModalStore, ['hiddenClass']),
     ...mapWritableState(useModalStore, {
