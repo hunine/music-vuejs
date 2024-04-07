@@ -6,11 +6,7 @@
   >
     {{ registerAlertMessage }}
   </div>
-  <vee-form
-    :validation-schema="schema"
-    @submit="register"
-    :initial-values="userData"
-  >
+  <vee-form :validation-schema="schema" @submit="register" :initial-values="userData">
     <!-- Name -->
     <div class="mb-3">
       <label class="inline-block mb-2">Name</label>
@@ -86,8 +82,9 @@
         name="tos"
         value="1"
         class="w-4 h-4 float-left -ml-6 mt-1 rounded"
+        id="tos"
       />
-      <label class="block">Accept terms of service</label>
+      <label class="block" for="tos">Accept terms of service</label>
       <ErrorMessage class="text-red-600" name="tos" />
     </div>
     <button
@@ -101,6 +98,10 @@
 </template>
 
 <script>
+import { auth, usersCollection } from '@/includes/firebase'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { addDoc } from 'firebase/firestore'
+
 export default {
   name: 'RegisterForm',
   data() {
@@ -124,16 +125,45 @@ export default {
     }
   },
   methods: {
-    register(values) {
+    async register(values) {
       this.registerInSubmission = true
       this.registerShowAlert = true
       this.registerAlertVariant = 'bg-blue-500'
       this.registerAlertMessage = 'Please wait! Your account is being created.'
 
+      let userCred = null
+
+      try {
+        userCred = await createUserWithEmailAndPassword(auth, values.email, values.password)
+      } catch (error) {
+        console.log('createUserWithEmailAndPassword Error: ', error)
+
+        this.registerInSubmission = false
+        this.registerAlertVariant = 'bg-red-500'
+        this.registerAlertMessage = 'An uexpected error occured. Please try again later.'
+        return
+      }
+
+      try {
+        await addDoc(usersCollection, {
+          name: values.name,
+          email: values.email,
+          age: values.age,
+          country: values.country
+        })
+      } catch (error) {
+        console.log('userCollection Error: ', error)
+
+        this.registerInSubmission = false
+        this.registerAlertVariant = 'bg-red-500'
+        this.registerAlertMessage = 'An uexpected error occured. Please try again later.'
+        return
+      }
+
       this.registerAlertVariant = 'bg-green-500'
       this.registerAlertMessage = 'Success! Your account has been created'
 
-      console.log('values: ', values)
+      console.log('userCred: ', userCred)
     }
   }
 }
