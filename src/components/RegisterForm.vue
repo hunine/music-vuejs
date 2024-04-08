@@ -98,9 +98,8 @@
 </template>
 
 <script>
-import { auth, usersCollection } from '@/includes/firebase'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
-import { addDoc } from 'firebase/firestore'
+import { mapActions } from 'pinia'
+import useUserStore from '@/stores/user'
 
 export default {
   name: 'RegisterForm',
@@ -125,35 +124,18 @@ export default {
     }
   },
   methods: {
+    ...mapActions(useUserStore, {
+      createUser: 'register'
+    }),
     async register(values) {
       this.registerInSubmission = true
       this.registerShowAlert = true
       this.registerAlertVariant = 'bg-blue-500'
       this.registerAlertMessage = 'Please wait! Your account is being created.'
 
-      let userCred = null
-
       try {
-        userCred = await createUserWithEmailAndPassword(auth, values.email, values.password)
+        this.createUser(values)
       } catch (error) {
-        console.log('createUserWithEmailAndPassword Error: ', error)
-
-        this.registerInSubmission = false
-        this.registerAlertVariant = 'bg-red-500'
-        this.registerAlertMessage = 'An uexpected error occured. Please try again later.'
-        return
-      }
-
-      try {
-        await addDoc(usersCollection, {
-          name: values.name,
-          email: values.email,
-          age: values.age,
-          country: values.country
-        })
-      } catch (error) {
-        console.log('userCollection Error: ', error)
-
         this.registerInSubmission = false
         this.registerAlertVariant = 'bg-red-500'
         this.registerAlertMessage = 'An uexpected error occured. Please try again later.'
@@ -163,7 +145,7 @@ export default {
       this.registerAlertVariant = 'bg-green-500'
       this.registerAlertMessage = 'Success! Your account has been created'
 
-      console.log('userCred: ', userCred)
+      window.location.reload()
     }
   }
 }
