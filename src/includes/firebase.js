@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { collection, getFirestore } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
 import { ENV_CONFIG } from '@/configs/env.config'
 
 const {
@@ -23,5 +24,6 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const db = getFirestore(app)
 const usersCollection = collection(db, 'users')
+const storage = getStorage()
 
-export { auth, db, usersCollection }
+export { auth, db, usersCollection, storage }

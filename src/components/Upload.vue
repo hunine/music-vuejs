@@ -21,24 +21,19 @@
       </div>
       <hr class="my-6" />
       <!-- Progess Bars -->
-      <div class="mb-4">
+      <div class="mb-4" v-for="upload in uploads" :key="upload.name">
         <!-- File Name -->
-        <div class="font-bold text-sm">Just another song.mp3</div>
+        <div class="font-bold text-sm" :class="upload.textClass">
+          <i :class="upload.icon"></i>
+          {{ upload.name }}
+        </div>
         <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
           <!-- Inner Progress Bar -->
-          <div class="transition-all progress-bar bg-blue-400" style="width: 75%"></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div class="transition-all progress-bar bg-blue-400" style="width: 35%"></div>
-        </div>
-      </div>
-      <div class="mb-4">
-        <div class="font-bold text-sm">Just another song.mp3</div>
-        <div class="flex h-4 overflow-hidden bg-gray-200 rounded">
-          <div class="transition-all progress-bar bg-blue-400" style="width: 55%"></div>
+          <div
+            class="transition-all progress-bar"
+            :class="upload.variant"
+            :style="{ width: upload.currentProgress + '%' }"
+          ></div>
         </div>
       </div>
     </div>
@@ -46,16 +41,60 @@
 </template>
 
 <script>
+import { ref, uploadBytesResumable } from 'firebase/storage'
+import { storage } from '@/includes/firebase'
+
 export default {
   name: 'Upload',
   data() {
     return {
-      isDragover: false
+      isDragover: false,
+      uploads: []
     }
   },
-  methods: {  
-    upload() {
+  methods: {
+    upload($event) {
       this.isDragover = false
+
+      const files = [...$event.dataTransfer.files]
+
+      files.forEach((file) => {
+        if (file.type !== 'audio/mpeg') {
+          return
+        }
+
+        const songRef = ref(storage, `songs/${file.name}`)
+        const uploadTask = uploadBytesResumable(songRef, file)
+
+        const uploadIndex =
+          this.uploads.push({
+            task: uploadTask,
+            currentProgress: 0,
+            name: file.name,
+            variant: 'bg-blue-400',
+            icon: 'fas fa-spinner fa-spin',
+            textClass: ''
+          }) - 1
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+
+            this.uploads[uploadIndex].currentProgress = progress
+          },
+          () => {
+            this.uploads[uploadIndex].variant = 'bg-red-400'
+            this.uploads[uploadIndex].icon = 'fas fa-times'
+            this.uploads[uploadIndex].textClass = 'text-red-400'
+          },
+          () => {
+            this.uploads[uploadIndex].variant = 'bg-green-400'
+            this.uploads[uploadIndex].icon = 'fas fa-check'
+            this.uploads[uploadIndex].textClass = 'text-green-400'
+          }
+        )
+      })
     }
   }
 }
