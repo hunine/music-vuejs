@@ -134,7 +134,7 @@ export default {
       this.registerAlertMessage = 'Please wait! Your account is being created.'
 
       try {
-        this.createUser(values)
+        await this.createUser(values)
       } catch (error) {
         this.registerInSubmission = false
         this.registerAlertVariant = 'bg-red-500'
@@ -144,7 +144,6 @@ export default {
 
       this.registerAlertVariant = 'bg-green-500'
       this.registerAlertMessage = 'Success! Your account has been created'
-
       window.location.reload()
     }
   }
